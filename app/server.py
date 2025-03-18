@@ -27,7 +27,12 @@ from google.genai.types import LiveServerToolCall
 from pydantic import BaseModel
 from websockets.exceptions import ConnectionClosedError
 
-from app.agent import MODEL_ID, genai_client, live_connect_config, tool_functions
+from app.agent import (
+    MODEL_ID,
+    genai_client,
+    live_connect_config,
+    tool_functions,
+)
 
 app = FastAPI()
 app.add_middleware(
@@ -45,7 +50,10 @@ class GeminiSession:
     """Manages bidirectional communication between a client and the Gemini model."""
 
     def __init__(
-        self, session: Any, websocket: WebSocket, tool_functions: dict[str, Callable]
+        self,
+        session: Any,
+        websocket: WebSocket,
+        tool_functions: dict[str, Callable],
     ) -> None:
         """Initialize the Gemini session.
 
@@ -81,17 +89,27 @@ class GeminiSession:
                         {**data["setup"], "type": "setup"}, severity="INFO"
                     )
                 else:
-                    logging.warning(f"Received unexpected input from client: {data}")
+                    logging.warning(
+                        f"Received unexpected input from client: {data}"
+                    )
             except ConnectionClosedError as e:
-                logging.warning(f"Client {self.user_id} closed connection: {e}")
+                logging.warning(
+                    f"Client {self.user_id} closed connection: {e}"
+                )
                 break
             except Exception as e:
-                logging.error(f"Error receiving from client {self.user_id}: {e!s}")
+                logging.error(
+                    f"Error receiving from client {self.user_id}: {e!s}"
+                )
                 break
 
     def _get_func(self, action_label: str) -> Callable | None:
         """Get the tool function for a given action label."""
-        return None if action_label == "" else self.tool_functions.get(action_label)
+        return (
+            None
+            if action_label == ""
+            else self.tool_functions.get(action_label)
+        )
 
     async def _handle_tool_call(
         self, session: Any, tool_call: LiveServerToolCall
@@ -103,11 +121,15 @@ class GeminiSession:
             tool_call: Tool call request from Gemini
         """
         for fc in tool_call.function_calls:
-            logging.debug(f"Calling tool function: {fc.name} with args: {fc.args}")
+            logging.debug(
+                f"Calling tool function: {fc.name} with args: {fc.args}"
+            )
             response = self._get_func(fc.name)(**fc.args)
             tool_response = types.LiveClientToolResponse(
                 function_responses=[
-                    types.FunctionResponse(name=fc.name, id=fc.id, response=response)
+                    types.FunctionResponse(
+                        name=fc.name, id=fc.id, response=response
+                    )
                 ]
             )
             logging.debug(f"Tool response: {tool_response}")
@@ -121,9 +143,13 @@ class GeminiSession:
         """
         while result := await self.session._ws.recv(decode=False):
             await self.websocket.send_bytes(result)
-            message = types.LiveServerMessage.model_validate(json.loads(result))
+            message = types.LiveServerMessage.model_validate(
+                json.loads(result)
+            )
             if message.tool_call:
-                tool_call = LiveServerToolCall.model_validate(message.tool_call)
+                tool_call = LiveServerToolCall.model_validate(
+                    message.tool_call
+                )
                 await self._handle_tool_call(self.session, tool_call)
 
 
@@ -145,15 +171,22 @@ def get_connect_and_run_callable(websocket: WebSocket) -> Callable:
         )
 
     @backoff.on_exception(
-        backoff.expo, ConnectionClosedError, max_tries=10, on_backoff=on_backoff
+        backoff.expo,
+        ConnectionClosedError,
+        max_tries=10,
+        on_backoff=on_backoff,
     )
     async def connect_and_run() -> None:
         async with genai_client.aio.live.connect(
             model=MODEL_ID, config=live_connect_config
         ) as session:
-            await websocket.send_json({"status": "Backend is ready for conversation"})
+            await websocket.send_json(
+                {"status": "Backend is ready for conversation"}
+            )
             gemini_session = GeminiSession(
-                session=session, websocket=websocket, tool_functions=tool_functions
+                session=session,
+                websocket=websocket,
+                tool_functions=tool_functions,
             )
             logging.info("Starting bidirectional communication")
             await asyncio.gather(
