@@ -19,6 +19,7 @@ from collections.abc import Callable
 from typing import Any, Literal
 
 import backoff
+from backoff.types import Details
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import logging as google_cloud_logging
@@ -163,10 +164,10 @@ def get_connect_and_run_callable(websocket: WebSocket) -> Callable:
         Callable: An async function that establishes and manages the Gemini connection
     """
 
-    async def on_backoff(details: backoff._typing.Details) -> None:
+    async def on_backoff(details: Details) -> None:
         await websocket.send_json(
             {
-                "status": f"Model connection error, retrying in {details['wait']} seconds..."
+                "status": f"Model connection error, retrying in {details.get('wait')} seconds..."
             }
         )
 
