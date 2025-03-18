@@ -16,7 +16,7 @@ import asyncio
 import json
 import logging
 from collections.abc import Callable
-from typing import Any, Literal
+from typing import Any
 
 import backoff
 from backoff.types import Details
@@ -25,7 +25,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import logging as google_cloud_logging
 from google.genai import types
 from google.genai.types import LiveServerToolCall
-from pydantic import BaseModel
 from websockets.exceptions import ConnectionClosedError
 
 from app.agent import (
@@ -204,23 +203,6 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
     await websocket.accept()
     connect_and_run = get_connect_and_run_callable(websocket)
     await connect_and_run()
-
-
-class Feedback(BaseModel):
-    """Represents feedback for a conversation."""
-
-    score: int | float
-    text: str | None = ""
-    run_id: str
-    user_id: str | None
-    log_type: Literal["feedback"] = "feedback"
-
-
-@app.post("/feedback")
-async def collect_feedback(feedback_dict: Feedback) -> None:
-    """Collect and log feedback."""
-    feedback_data = feedback_dict.model_dump()
-    logger.log_struct(feedback_data, severity="INFO")
 
 
 if __name__ == "__main__":
