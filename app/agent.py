@@ -27,6 +27,7 @@ from langchain_google_vertexai import VertexAIEmbeddings
 
 from app.templates import FORMAT_DOCS, SYSTEM_INSTRUCTION
 from app.vector_store import get_vector_store
+from app.dummy_agent import developer_interview
 
 # Constants
 VERTEXAI = os.getenv("VERTEXAI", "true").lower() == "true"
@@ -77,10 +78,20 @@ retrieve_docs_tool = Tool(
     ]
 )
 
-tool_functions = {"retrieve_docs": retrieve_docs}
+# Add the developer interview tool
+developer_interview_tool = Tool(
+    function_declarations=[
+        FunctionDeclaration.from_callable(client=genai_client, callable=developer_interview)
+    ]
+)
+
+tool_functions = {
+    "retrieve_docs": retrieve_docs,
+    "developer_interview": developer_interview
+}
 
 live_connect_config = LiveConnectConfig(
     response_modalities=["AUDIO"],
-    tools=[retrieve_docs_tool],
+    tools=[retrieve_docs_tool, developer_interview_tool],
     system_instruction=Content(parts=[{"text": SYSTEM_INSTRUCTION}]),
 )
