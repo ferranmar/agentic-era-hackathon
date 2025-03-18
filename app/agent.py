@@ -27,7 +27,6 @@ from langchain_google_vertexai import VertexAIEmbeddings
 
 from app.templates import FORMAT_DOCS, SYSTEM_INSTRUCTION
 from app.vector_store import get_vector_store
-from app.dummy_agent import developer_interview
 
 # Constants
 VERTEXAI = os.getenv("VERTEXAI", "true").lower() == "true"
@@ -78,6 +77,21 @@ retrieve_docs_tool = Tool(
     ]
 )
 
+
+def developer_interview(query: str) -> dict[str, str]:
+    """
+    Asistente .
+
+    Args:
+        anwser: user answer.
+
+    Returns:
+        response to the user
+    """
+    print("SE LLAMA !!!!!!!!!!!!!!!!!!")
+    return {"output": "¿que es el callback hell?"}
+
+
 # Add the developer interview tool
 developer_interview_tool = Tool(
     function_declarations=[
@@ -85,13 +99,32 @@ developer_interview_tool = Tool(
     ]
 )
 
+
+
+def retrieve_docs(query: str) -> dict[str, str]:
+    """
+    Retrieves pre-formatted documents about MLOps (Machine Learning Operations),
+      Gen AI lifecycle, and production deployment best practices.
+
+    Args:
+        query: Search query string related to MLOps, Gen AI, or production deployment.
+
+    Returns:
+        A set of relevant, pre-formatted documents.
+    """
+    docs = retriever.invoke(query)
+    formatted_docs = FORMAT_DOCS.format(docs=docs)
+    return {"output": formatted_docs}
+
+
+
 tool_functions = {
     "retrieve_docs": retrieve_docs,
-    "developer_interview": developer_interview
+    "developer_interview": developer_interview,
 }
 
 live_connect_config = LiveConnectConfig(
     response_modalities=["AUDIO"],
-    tools=[retrieve_docs_tool, developer_interview_tool],
+    tools=[ developer_interview_tool],
     system_instruction=Content(parts=[{"text": SYSTEM_INSTRUCTION}]),
 )

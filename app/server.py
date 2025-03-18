@@ -91,6 +91,10 @@ class GeminiSession:
 
     def _get_func(self, action_label: str) -> Callable | None:
         """Get the tool function for a given action label."""
+        print("ACTION LABEL")
+        print(action_label)
+        print(self.tool_functions)
+        print(self.tool_functions.get(action_label))
         return None if action_label == "" else self.tool_functions.get(action_label)
 
     async def _handle_tool_call(
@@ -122,7 +126,12 @@ class GeminiSession:
         while result := await self.session._ws.recv(decode=False):
             await self.websocket.send_bytes(result)
             message = types.LiveServerMessage.model_validate(json.loads(result))
+
             if message.tool_call:
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print(message)
+
+
                 tool_call = LiveServerToolCall.model_validate(message.tool_call)
                 await self._handle_tool_call(self.session, tool_call)
 
