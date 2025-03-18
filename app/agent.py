@@ -46,7 +46,9 @@ vertexai.init(project=project_id, location=LOCATION)
 
 if VERTEXAI:
     genai_client = genai.Client(
-        project=project_id, location=LOCATION, vertexai=True
+        project=project_id,
+        location=LOCATION,
+        vertexai=True,
     )
 else:
     # API key should be set using GOOGLE_API_KEY environment variable
