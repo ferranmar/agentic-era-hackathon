@@ -6,6 +6,7 @@ from typing import Any
 from fastapi import WebSocket
 from google.cloud import logging as google_cloud_logging
 from google.genai import types
+from google.genai.live import AsyncSession
 from google.genai.types import LiveServerToolCall
 from websockets.exceptions import ConnectionClosedError
 
@@ -19,7 +20,7 @@ class GeminiSession:
 
     def __init__(
         self,
-        session: Any,
+        session: AsyncSession,
         websocket: WebSocket,
         tool_functions: dict[str, Callable],
     ) -> None:
