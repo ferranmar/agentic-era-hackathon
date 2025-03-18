@@ -14,13 +14,15 @@
 
 import os
 
-import google
 import vertexai
 from google import genai
+from google.auth import default
 from google.genai.types import (
     Content,
     FunctionDeclaration,
     LiveConnectConfig,
+    Modality,
+    Part,
     Tool,
 )
 from langchain_google_vertexai import VertexAIEmbeddings
@@ -38,12 +40,14 @@ URLS = [
 ]
 
 # Initialize Google Cloud clients
-credentials, project_id = google.auth.default()
+credentials, project_id = default()
 vertexai.init(project=project_id, location=LOCATION)
 
 
 if VERTEXAI:
-    genai_client = genai.Client(project=project_id, location=LOCATION, vertexai=True)
+    genai_client = genai.Client(
+        project=project_id, location=LOCATION, vertexai=True
+    )
 else:
     # API key should be set using GOOGLE_API_KEY environment variable
     genai_client = genai.Client(http_options={"api_version": "v1alpha"})
@@ -73,14 +77,16 @@ def retrieve_docs(query: str) -> dict[str, str]:
 # Configure tools and live connection
 retrieve_docs_tool = Tool(
     function_declarations=[
-        FunctionDeclaration.from_callable(client=genai_client, callable=retrieve_docs)
+        FunctionDeclaration.from_callable(
+            client=genai_client, callable=retrieve_docs
+        )
     ]
 )
 
 tool_functions = {"retrieve_docs": retrieve_docs}
 
 live_connect_config = LiveConnectConfig(
-    response_modalities=["AUDIO"],
+    response_modalities=[Modality.AUDIO],
     tools=[retrieve_docs_tool],
-    system_instruction=Content(parts=[{"text": SYSTEM_INSTRUCTION}]),
+    system_instruction=Content(parts=[Part(text=SYSTEM_INSTRUCTION)]),
 )
