@@ -37,7 +37,11 @@ tools = [search]
 
 # 2. Set up the language model
 llm = ChatVertexAI(
-    model=LLM, location=LOCATION, temperature=0, max_tokens=1024, streaming=True
+    model=LLM,
+    location=LOCATION,
+    temperature=0,
+    max_tokens=1024,
+    streaming=True,
 ).bind_tools(tools)
 
 
@@ -48,12 +52,14 @@ def should_continue(state: MessagesState) -> str:
     return "tools" if last_message.tool_calls else END
 
 
-def call_model(state: MessagesState, config: RunnableConfig) -> dict[str, BaseMessage]:
+def call_model(
+    state: MessagesState, config: RunnableConfig
+) -> dict[str, BaseMessage]:
     """Calls the language model and returns the response."""
     system_message = "You are a helpful AI assistant."
-    messages_with_system = [{"type": "system", "content": system_message}] + state[
-        "messages"
-    ]
+    messages_with_system = [
+        {"type": "system", "content": system_message}
+    ] + state["messages"]
     # Forward the RunnableConfig object to ensure the agent is capable of streaming the response.
     response = llm.invoke(messages_with_system, config)
     return {"messages": response}

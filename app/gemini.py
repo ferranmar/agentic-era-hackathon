@@ -55,8 +55,12 @@ class GeminiSession:
                     logging.info(
                         f"Has `realtimeInput` or `clientContent` in {data=}"
                     )
-                    for messages, _ in self.agent.stream(data):
-                        await self.websocket.send_bytes(messages)
+                    input_dict = {"messages": [{"type": "human", "content": str(data)}]}
+                    for messages in self.agent.stream(input_dict):
+                        logging.info(f"{messages=}")
+                        content = messages["agent"]["messages"].model_dump_json()
+                        logging.info(f"{content=}")
+                        await self.websocket.send_text(content)
 
                     await self.session._ws.send(json.dumps(data))
                 elif "setup" in data:
@@ -120,6 +124,7 @@ class GeminiSession:
         and handles any tool calls. Handles connection errors gracefully.
         """
         while result := await self.session._ws.recv(decode=False):
+            logging.info(f"{result=}")
             await self.websocket.send_bytes(result)
             message = types.LiveServerMessage.model_validate(
                 json.loads(result)
