@@ -1,13 +1,13 @@
 import json
 import logging
 from collections.abc import Callable
-from typing import Any
 
 from fastapi import WebSocket
 from google.cloud import logging as google_cloud_logging
 from google.genai import types
 from google.genai.live import AsyncSession
 from google.genai.types import LiveServerToolCall
+from langgraph.graph.state import CompiledStateGraph
 from websockets.exceptions import ConnectionClosedError
 
 logging_client = google_cloud_logging.Client()
@@ -23,6 +23,7 @@ class GeminiSession:
         session: AsyncSession,
         websocket: WebSocket,
         tool_functions: dict[str, Callable],
+        agent: CompiledStateGraph,
     ) -> None:
         """Initialize the Gemini session.
 
@@ -37,6 +38,7 @@ class GeminiSession:
         self.run_id = "n/a"
         self.user_id = "n/a"
         self.tool_functions = tool_functions
+        self.agent = agent
 
     async def receive_from_client(self) -> None:
         """Listen for and process messages from the client.
@@ -50,7 +52,9 @@ class GeminiSession:
                 if isinstance(data, dict) and (
                     "realtimeInput" in data or "clientContent" in data
                 ):
-                    logging.info(f"Has `realtimeInput` or `clientContent` in {data=}")
+                    logging.info(
+                        f"Has `realtimeInput` or `clientContent` in {data=}"
+                    )
                     await self.session._ws.send(json.dumps(data))
                 elif "setup" in data:
                     logging.info(f"Has `setup`in {data=}")
@@ -83,7 +87,7 @@ class GeminiSession:
         )
 
     async def _handle_tool_call(
-        self, session: Any, tool_call: LiveServerToolCall
+        self, session: AsyncSession, tool_call: LiveServerToolCall
     ) -> None:
         """Process tool calls from Gemini and send back responses.
 
@@ -114,6 +118,9 @@ class GeminiSession:
         """
         while result := await self.session._ws.recv(decode=False):
             await self.websocket.send_bytes(result)
+            for messages, _ in self.agent.stream(result):
+                await self.websocket.send_bytes(messages)
+                # await self.session.send(messages)
             message = types.LiveServerMessage.model_validate(
                 json.loads(result)
             )
