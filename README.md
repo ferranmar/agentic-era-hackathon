@@ -1,175 +1,130 @@
-# my-hackathon-agent
+# Sistema de Entrevistas Automatizado con IA
 
-A real-time multimodal RAG agent powered by Gemini, supporting audio/video/text chat with vector DB-backed responses
+## Descripción General
+Este proyecto implementa un sistema avanzado de entrevistas automatizadas utilizando inteligencia artificial, específicamente diseñado para realizar entrevistas técnicas a desarrolladores. El sistema utiliza la API de Google Vertex AI y el modelo Gemini para proporcionar una experiencia de entrevista interactiva y dinámica.
 
-Agent generated with [`googleCloudPlatform/agent-starter-pack`](https://github.com/GoogleCloudPlatform/agent-starter-pack)
+## Componentes Principales
 
-## Project Structure
+### 1. InterviewAgent (interview_agent.py)
+Este es el componente central que maneja la lógica de la entrevista. Sus características principales incluyen:
 
-This project is organized as follows:
-
-```
-my-hackathon-agent/
-├── app/                 # Core application code
-│   ├── agent.py         # Main agent logic
-│   ├── server.py        # FastAPI Backend server
-│   └── utils/           # Utility functions and helpers
-├── deployment/          # Infrastructure and deployment scripts
-├── notebooks/           # Jupyter notebooks for prototyping and evaluation
-├── tests/               # Unit, integration, and load tests
-├── Makefile             # Makefile for common commands
-└── pyproject.toml       # Project dependencies and configuration
-```
-
-## Requirements
-
-Before you begin, ensure you have:
-- **uv**: Python package manager - [Install](https://docs.astral.sh/uv/getting-started/installation/)
-- **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
-- **Terraform**: For infrastructure deployment - [Install](https://developer.hashicorp.com/terraform/downloads)
-- **make**: Build automation tool - [Install](https://www.gnu.org/software/make/) (pre-installed on most Unix-based systems)
+#### Gestión de Estados
+Implementa una máquina de estados que controla el flujo de la entrevista a través de diferentes fases:
+- Presentación
+- Experiencia
+- Técnico
+- Informe final
 
 
-### Installation
+![alt text](diagram.png)
 
-Install required packages using uv:
+#### Sistema de Preguntas
+- Cada estado contiene un conjunto predefinido de preguntas relevantes para esa fase de la entrevista.
+- Evaluación de Respuestas: Incluye un sistema de evaluación que determina cuándo avanzar a la siguiente fase de la entrevista.
 
-```bash
-make install
-```
+#### Generación de Informes
+Al finalizar la entrevista, genera un informe detallado que incluye:
+- Resumen del perfil
+- Puntos fuertes
+- Áreas de mejora
+- Recomendación final
 
-### Setup
+### 2. Sistema de Agentes (agent.py)
+Este módulo gestiona la integración con los servicios de Google Cloud y configura las herramientas disponibles para el sistema:
 
-If not done during the initialization, set your default Google Cloud project and Location:
+#### Integración con Google Cloud:
+- Configuración de credenciales
+- Inicialización de Vertex AI
+- Configuración del cliente Gemini
 
-```bash
-export PROJECT_ID="YOUR_PROJECT_ID"
-export LOCATION="us-central1"
-gcloud config set project $PROJECT_ID
-gcloud auth application-default login
-gcloud auth application-default set-quota-project $PROJECT_ID
-```
+#### Herramientas de Entrevista:
+- `developer_interview_python`: Maneja preguntas específicas sobre Python
+- `developer_interview_company`: Proporciona información sobre la empresa
+- `developer_interview_nervous`: Analiza el estado emocional del candidato
 
-## Commands
+### 3. Servidor WebSocket (server.py)
+Implementa la interfaz de comunicación en tiempo real:
 
-| Command              | Description                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `make install`       | Install all required dependencies using uv                                                  |
-| `make playground`    | Launch local development environment with backend and frontend |
-| `make backend`       | Start backend server only |
-| `make ui`            | Launch Streamlit frontend without local backend |
-| `make test`          | Run unit and integration tests                                                              |
-| `make lint`          | Run code quality checks (codespell, ruff, mypy)                                             |
-| `uv run jupyter lab` | Launch Jupyter notebook                                                                     |
+#### Gestión de Conexiones
+- Maneja conexiones WebSocket bidireccionales entre el cliente y el modelo Gemini.
 
-For full command options and usage, refer to the [Makefile](Makefile).
+#### Procesamiento de Mensajes:
+- Recibe y procesa mensajes del cliente
+- Gestiona las respuestas del modelo
+- Maneja llamadas a herramientas específicas
 
+#### Sistema de Retroalimentación
+- Incluye endpoints para recopilar feedback sobre las entrevistas.
 
-## Usage
+### 4. Plantillas del Sistema (templates.py)
+Define las instrucciones y formatos para:
 
-1.  **Install Dependencies:**
+#### Formato de Documentos
+- Estructura cómo se presentan los documentos y contextos.
 
-    ```bash
-    make install
-    ```
+#### Instrucciones del Sistema
+Define el comportamiento del entrevistador virtual, incluyendo:
+- Rol y objetivos
+- Secuencia de la entrevista
+- Reglas de interacción
 
-2.  **Start the Backend and Frontend:**
+## Características Técnicas Destacadas
 
-    **Backend:**
-    ```bash
-    make backend
-    ```
-    
-    The backend will be ready when you see `INFO:     Application startup complete.` in the console.
+### Integración con IA
+- Utiliza el modelo Gemini 2.0 Flash
+- Implementa embeddings para procesamiento de texto
+- Sistema de vectores para recuperación de información
 
-    <details>
-    <summary><b>Click here if you want to use AI Studio and API Key instead of Vertex AI:</b></summary>
+### Arquitectura del Sistema
+- Implementación basada en grafos para el flujo de la entrevista
+- Sistema de checkpoints para mantener el estado
+- Manejo asíncrono de comunicaciones
 
-    ```bash
-    export VERTEXAI=false
-    export GOOGLE_API_KEY=your-google-api-key
-    ```
+### Seguridad y Logging
+- Integración con Google Cloud Logging
+- Manejo de errores y reintentos
+- Sistema de feedback estructurado
 
-    </details>
-    <br>
-    
-    **Frontend:**
-    ```bash
-    # In a different shell
-    make ui
-    ```
+## Flujo de la Entrevista
 
-    This is the suggested mode for development as it allows you to see changes in real-time.
+### Inicio:
+- Inicialización del agente
+- Establecimiento de conexión WebSocket
 
-3.  **Interact with the Agent**
-    Once both the backend and frontend are running, click the play button in the frontend UI to establish a connection with the backend. You can now interact with the Multimodal Live Agent! You can try asking questions such as "Using the tool you have, define Governance in the context MLOPs" to allow the agent to use the documentation it was provided to.
+### Proceso de Entrevista:
+- Fase de presentación
+- Evaluación de experiencia
+- Preguntas técnicas
+- Análisis continuo del estado emocional
 
-**Remote access**:
-Use [Cloud Run proxy](https://cloud.google.com/sdk/gcloud/reference/run/services/proxy) for local access. The backend will be accessible at `http://localhost:8000`:
+### Finalización:
+- Generación de informe
+- Recopilación de feedback
+- Cierre de conexión
 
-   ```bash
-   gcloud run services proxy genai-app-sample --port 8000 --project $PROJECT_ID --region $REGION
-   ```
+## Consideraciones Técnicas
 
-   You can then use the same frontend setup described above to interact with your Cloud Run deployment.
+### Requisitos del Sistema
+- Python 3.x
+- Google Cloud Platform
+- FastAPI
+- WebSockets
+- Vertex AI
 
-<details>
-<summary><b>Cloud Shell usage</b></summary>
+### Configuración
+- Requiere credenciales de Google Cloud
+- Variables de entorno para configuración
+- Configuración de modelos y ubicación
 
-To use the `multimodal_live_api` agent in Cloud Shell, follow these steps:
+### Escalabilidad
+- Diseño modular para fácil extensión
+- Soporte para múltiples sesiones simultáneas
+- Sistema de reintentos para conexiones fallidas
 
-1.  **Start the Frontend:**
+## Uso y Mantenimiento
+- Inicialización
+- Procesamiento de Respuestas
+- Reinicio de Entrevista
 
-    ```bash
-    make ui
-    ```
+Este sistema proporciona una solución completa y sofisticada para automatizar el proceso de entrevistas técnicas, combinando tecnologías avanzadas de IA con una arquitectura robusta y escalable.
 
-    You may be prompted to run the app on a different port if port 3000 is in use. Accept by pressing Enter. You'll see a message similar to:
-
-    ```
-    You can now view multimodal-live-api-web-console in the browser.
-
-      Local:            http://localhost:3001
-      On Your Network:  http://10.88.0.4:3001
-    ```
-
-    Click the `localhost` link to open a web preview in Cloud Shell.
-
-2.  **Start the Backend:**
-
-    Open a *new* Cloud Shell terminal tab. Remember to set your Cloud Platform project in this new session using `gcloud config set project [PROJECT_ID]`. Then from the root of the repository, run:
-
-    ```bash
-    make backend
-    ```
-
-3.  **Configure Web Preview for the Backend:**
-
-    Trigger a web preview for port 8000 - you'll need to change the default port which is `8080`.  See [Cloud Shell Web Preview documentation](https://cloud.google.com/shell/docs/using-web-preview#preview_the_application) for details.
-
-4.  **Connect Frontend to Backend:**
-
-    *   The web preview will open a new tab in your browser. Copy the URL from the address bar (e.g., `https://8000-cs-8a3189b8-5295-4085-9893-c318f1724456.ql-europe-west1-ojep.cloudshell.dev/?authuser=0`).
-    *   Return to the frontend preview tab (from step 1).
-    *   Paste the copied URL into the frontend's "Server URL" connection settings.
-    *   Click the "Play button" to connect. Start interacting with it!
-
-*   When using Cloud Shell there is a known limitation when using the feedback feature in the Frontend. Feedback submission might fail due to different origins between the frontend and backend in the Cloud Shell environment.
-</details>
-
-## Deployment
-
-### Dev Environment
-
-The repository includes a Terraform configuration for the setup of the Dev Google Cloud project.
-See [deployment/README.md](deployment/README.md) for instructions.
-
-### Production Deployment
-
-The repository includes a Terraform configuration for the setup of a production Google Cloud project. Refer to [deployment/README.md](deployment/README.md) for detailed instructions on how to deploy the infrastructure and application.
-
-## Monitoring and Observability
-
->> You can use [this Looker Studio dashboard](https://lookerstudio.google.com/c/reporting/fa742264-4b4b-4c56-81e6-a667dd0f853f/page/tEnnC) template for visualizing events being logged in BigQuery. See the "Setup Instructions" tab to getting started.
-
-The application uses OpenTelemetry for comprehensive observability with all events being sent to Google Cloud Trace and Logging for monitoring and to BigQuery for long term storage. 
