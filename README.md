@@ -15,7 +15,6 @@ Implementa una máquina de estados que controla el flujo de la entrevista a trav
 - Técnico
 - Informe final
 
-
 ![alt text](diagram.png)
 
 #### Sistema de Preguntas
