@@ -23,13 +23,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import logging as google_cloud_logging
 from websockets.exceptions import ConnectionClosedError
 
-from app.agent import (
+from app.agent import agent
+from app.gemini import GeminiSession
+from app.tool import (
     MODEL_ID,
     genai_client,
     live_connect_config,
     tool_functions,
 )
-from app.gemini import GeminiSession
 
 app = FastAPI()
 app.add_middleware(
@@ -77,6 +78,7 @@ def get_connect_and_run_callable(websocket: WebSocket) -> Callable:
                 session=session,
                 websocket=websocket,
                 tool_functions=tool_functions,
+                agent=agent,
             )
             logging.info("Starting bidirectional communication")
             await asyncio.gather(
