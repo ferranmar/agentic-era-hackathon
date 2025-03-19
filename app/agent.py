@@ -163,20 +163,8 @@ def developer_interview(anwser: str) -> dict[str, str]:
 
 developer_interview_tool = Tool(
     function_declarations=[
-        # FunctionDeclaration(
-        #     name="developer_interview",
-        #     description="Herramienta para obtener la siguiente pregunta de la entrevista. Tienes que indicar siempre que es lo que ha dicho el usuario",
-        #     parameters=Schema(
-        #         type="object",
-        #         properties={"anwser": {"type": "string", "description": "Respuesta del usuario"}}
-        #     ),
-        #     response=Schema(
-        #         type="object",
-        #         properties={"question": {"type": "string", "description": "Pregunta para la entrevista"}}
-        #     )
-        # ), 
         FunctionDeclaration(
-            name="developer_interview_nervous",
+            name="developer_interview",
             description="Herramienta para obtener la siguiente pregunta de la entrevista. Tienes que indicar siempre que es lo que ha dicho el usuario",
             parameters=Schema(
                 type="object",
@@ -187,30 +175,42 @@ developer_interview_tool = Tool(
                 properties={"question": {"type": "string", "description": "Pregunta para la entrevista"}}
             )
         ), 
-        FunctionDeclaration(
-            name="developer_interview_company",
-            description="Herramienta para obtener la siguiente pregunta de la entrevista. Tienes que indicar siempre que es lo que ha dicho el usuario",
-            parameters=Schema(
-                type="object",
-                properties={"anwser": {"type": "string", "description": "Respuesta del usuario"}}
-            ),
-            response=Schema(
-                type="object",
-                properties={"question": {"type": "string", "description": "Pregunta para la entrevista"}}
-            )
-        ),
-        FunctionDeclaration(
-            name="developer_interview_python",
-            description="Herramienta para obtener la siguiente pregunta de la entrevista. Tienes que indicar siempre que es lo que ha dicho el usuario",
-            parameters=Schema(
-                type="object",
-                properties={"anwser": {"type": "string", "description": "Respuesta del usuario"}}
-            ),
-            response=Schema(
-                type="object",
-                properties={"question": {"type": "string", "description": "Pregunta para la entrevista"}}
-            )
-        )
+        # FunctionDeclaration(
+        #     name="developer_interview_nervous",
+        #     description="Herramienta para obtener la siguiente pregunta de la entrevista. Tienes que indicar siempre que es lo que ha dicho el usuario",
+        #     parameters=Schema(
+        #         type="object",
+        #         properties={"anwser": {"type": "string", "description": "Respuesta del usuario"}}
+        #     ),
+        #     response=Schema(
+        #         type="object",
+        #         properties={"question": {"type": "string", "description": "Pregunta para la entrevista"}}
+        #     )
+        # ), 
+        # FunctionDeclaration(
+        #     name="developer_interview_company",
+        #     description="Herramienta para obtener la siguiente pregunta de la entrevista. Tienes que indicar siempre que es lo que ha dicho el usuario",
+        #     parameters=Schema(
+        #         type="object",
+        #         properties={"anwser": {"type": "string", "description": "Respuesta del usuario"}}
+        #     ),
+        #     response=Schema(
+        #         type="object",
+        #         properties={"question": {"type": "string", "description": "Pregunta para la entrevista"}}
+        #     )
+        # ),
+        # FunctionDeclaration(
+        #     name="developer_interview_python",
+        #     description="Herramienta para obtener la siguiente pregunta de la entrevista. Tienes que indicar siempre que es lo que ha dicho el usuario",
+        #     parameters=Schema(
+        #         type="object",
+        #         properties={"anwser": {"type": "string", "description": "Respuesta del usuario"}}
+        #     ),
+        #     response=Schema(
+        #         type="object",
+        #         properties={"question": {"type": "string", "description": "Pregunta para la entrevista"}}
+        #     )
+        # )
     ]
 )
 
@@ -235,10 +235,10 @@ def retrieve_docs(query: str) -> dict[str, str]:
 
 tool_functions = {
     # "retrieve_docs": retrieve_docs,
-    "developer_interview_python": developer_interview_python,
-    "developer_interview_company": developer_interview_company,
-    "developer_interview_nervous": developer_interview_nervous,
-    # "developer_interview": developer_interview
+    # "developer_interview_python": developer_interview_python,
+    # "developer_interview_company": developer_interview_company,
+    # "developer_interview_nervous": developer_interview_nervous,
+    "developer_interview": developer_interview
 }
 
 live_connect_config = LiveConnectConfig(
