@@ -50,8 +50,10 @@ class GeminiSession:
                 if isinstance(data, dict) and (
                     "realtimeInput" in data or "clientContent" in data
                 ):
+                    logging.info(f"Has `realtimeInput` or `clientContent` in {data=}")
                     await self.session._ws.send(json.dumps(data))
                 elif "setup" in data:
+                    logging.info(f"Has `setup`in {data=}")
                     self.run_id = data["setup"]["run_id"]
                     self.user_id = data["setup"]["user_id"]
                     logger.log_struct(
