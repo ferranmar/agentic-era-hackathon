@@ -55,6 +55,9 @@ class GeminiSession:
                     logging.info(
                         f"Has `realtimeInput` or `clientContent` in {data=}"
                     )
+                    for messages, _ in self.agent.stream(data):
+                        await self.websocket.send_bytes(messages)
+
                     await self.session._ws.send(json.dumps(data))
                 elif "setup" in data:
                     logging.info(f"Has `setup`in {data=}")
@@ -118,9 +121,6 @@ class GeminiSession:
         """
         while result := await self.session._ws.recv(decode=False):
             await self.websocket.send_bytes(result)
-            for messages, _ in self.agent.stream(result):
-                await self.websocket.send_bytes(messages)
-                # await self.session.send(messages)
             message = types.LiveServerMessage.model_validate(
                 json.loads(result)
             )
