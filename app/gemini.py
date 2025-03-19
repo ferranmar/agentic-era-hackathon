@@ -92,7 +92,7 @@ class GeminiSession:
             tool_call: Tool call request from Gemini
         """
         for fc in tool_call.function_calls:
-            logging.debug(
+            logging.info(
                 f"Calling tool function: {fc.name} with args: {fc.args}"
             )
             response = self._get_func(fc.name)(**fc.args)
@@ -103,7 +103,7 @@ class GeminiSession:
                     )
                 ]
             )
-            logging.debug(f"Tool response: {tool_response}")
+            logging.info(f"Tool response: {tool_response}")
             await session.send(input=tool_response)
 
     async def receive_from_gemini(self) -> None:
