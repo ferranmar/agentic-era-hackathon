@@ -55,12 +55,16 @@ class GeminiSession:
                     logging.info(
                         f"Has `realtimeInput` or `clientContent` in {data=}"
                     )
-                    input_dict = {"messages": [{"type": "human", "content": str(data)}]}
+                    # data = {'clientContent': {'turns': [{'role': 'user', 'parts': [{'text': 'What is the weather like in San Francisco?'}]}], 'turnComplete': True}}
+                    input_dict = {"messages": [{"type": "human", "content": data["clientContent"]["turns"][0]["parts"][0]["text"]}]}
+                    logging.info(f"{input_dict=}")
                     for messages in self.agent.stream(input_dict):
                         logging.info(f"{messages=}")
-                        content = messages["agent"]["messages"].model_dump_json()
+                        content = messages["agent"]["messages"].content
                         logging.info(f"{content=}")
-                        await self.websocket.send_text(content)
+                        dict_for_ui = {"serverContent": {"modelTurn": {"role": "model", "parts": [{"text": content}]}}}
+                        logging.info(f"{dict_for_ui=}")
+                        await self.websocket.send_json(json.dumps(dict_for_ui))
 
                     await self.session._ws.send(json.dumps(data))
                 elif "setup" in data:
