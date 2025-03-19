@@ -51,25 +51,20 @@ else:
 
 
 def hello_world():
-    return {
-        "output": "hello world",
-    }
+    return {"output": "hello world!"}
 
 
 hello_world_tool = Tool(
-    function_declarations=[
-        FunctionDeclaration.from_callable(
-            client=genai_client, callable=hello_world
-        )
-    ]
+    function_declarations=[FunctionDeclaration(name="hello_world")]
 )
 
+
 tool_functions = {
-    "hello_word": hello_world,
+    "hello_world": hello_world,
 }
 
 live_connect_config = LiveConnectConfig(
-    response_modalities=[Modality.AUDIO],
+    response_modalities=[Modality.TEXT],
     tools=[hello_world_tool],
     system_instruction=Content(parts=[Part(text=SYSTEM_INSTRUCTION)]),
 )
